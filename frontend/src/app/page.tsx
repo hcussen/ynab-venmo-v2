@@ -23,7 +23,7 @@ export default function Home() {
           <li className="tracking-[-.01em]">
             Save and see your changes instantly.
           </li>
-          <li>Testing the github actions</li>
+          <li>Testing the github actions again</li>
         </ol>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
