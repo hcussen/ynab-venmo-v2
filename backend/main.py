@@ -1,6 +1,17 @@
 from typing import Optional
-from fastapi import FastAPI
+from fastapi import FastAPI, Form, Request
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from supabase import create_client, Client
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+# Create logger
+logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
@@ -11,8 +22,6 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-import os
-from supabase import create_client, Client
 
 url: str = settings.supabase_url
 key: str = settings.supabase_key
@@ -31,6 +40,20 @@ async def root():
 async def get_supabase():
     response = supabase.table("planets").select("*").execute()
     return response
+
+
+@app.post("/parse")
+async def sendgrid_inbound_webhook(
+    request: Request,
+    subject: str = Form(...),
+):
+    """
+    Simple handler for SendGrid Parse webhook that just logs the email subject.
+    This is useful for initial testing of the webhook configuration.
+    """
+    logger.info(f"Received email with subject: {subject}")
+
+    return {"status": "success", "message": "Email subject logged successfully"}
 
 
 @app.get("/items/{item_id}")
