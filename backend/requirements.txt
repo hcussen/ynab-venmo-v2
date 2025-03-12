@@ -30,6 +30,7 @@ packaging==24.2
 postgrest==0.19.3
 propcache==0.3.0
 pydantic==2.10.6
+pydantic-settings==2.8.1
 pydantic_core==2.27.2
 Pygments==2.19.1
 python-dateutil==2.9.0.post0
