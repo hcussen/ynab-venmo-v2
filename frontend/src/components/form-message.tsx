@@ -1,9 +1,11 @@
 export type Message =
   | { success: string }
   | { error: string }
-  | { message: string };
+  | { message: string }
 
 export function FormMessage({ message }: { message: Message }) {
+  console.log("Rendering FormMessage with:", message)
+  console.log("Has error property:", "error" in message)
   return (
     <div className="flex flex-col gap-2 w-full max-w-md text-sm">
       {"success" in message && (
@@ -11,14 +13,10 @@ export function FormMessage({ message }: { message: Message }) {
           {message.success}
         </div>
       )}
-      {"error" in message && (
-        <div className="text-destructive-foreground border-l-2 border-destructive-foreground px-4">
-          {message.error}
-        </div>
-      )}
+      {"error" in message && <div className="px-4">{message.error}</div>}
       {"message" in message && (
         <div className="text-foreground border-l-2 px-4">{message.message}</div>
       )}
     </div>
-  );
+  )
 }
