@@ -1,11 +1,5 @@
-import Hero from "@/components/hero"
-import ConnectSupabaseSteps from "@/components/tutorial/connect-supabase-steps"
-import SignUpUserSteps from "@/components/tutorial/sign-up-user-steps"
-import { hasEnvVars } from "@/lib/supabase/check-env-vars"
-import FetchDataSteps from "@/components/tutorial/fetch-data-steps"
 import { createClient } from "@/lib/supabase/server"
 import { InfoIcon } from "lucide-react"
-import { redirect } from "next/navigation"
 
 export default async function Home() {
   const supabase = await createClient()
