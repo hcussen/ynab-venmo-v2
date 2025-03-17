@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { InfoIcon } from "lucide-react"
+import { AccessTokenDisplay } from "./AccessTokenDisplay"
 
 export default async function Home() {
   const supabase = await createClient()
@@ -7,6 +8,8 @@ export default async function Home() {
   const {
     data: { user },
   } = await supabase.auth.getUser()
+
+  const session = await supabase.auth.getSession()
 
   if (!user) {
     return <>Not logged in!</>
@@ -24,6 +27,9 @@ export default async function Home() {
           </div>
         </div>
         <div className="flex flex-col gap-2 items-start">
+          <h2>Your JWT is</h2>
+          <AccessTokenDisplay token={session.data.session?.access_token} />
+
           <h2 className="font-bold text-2xl mb-4">Your user details</h2>
           <pre className="text-xs font-mono p-3 rounded border max-h-32 overflow-auto">
             {JSON.stringify(user, null, 2)}
