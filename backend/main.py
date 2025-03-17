@@ -1,31 +1,10 @@
 from typing import Optional
-from fastapi import FastAPI, Form, Request
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from supabase import create_client, Client
-import logging
+from fastapi import FastAPI, Form, Depends, Request, HTTPException
+from sqlalchemy.orm import Session
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-
-# Create logger
-logger = logging.getLogger(__name__)
-
-
-class Settings(BaseSettings):
-    supabase_url: str
-    supabase_key: str
-    model_config = SettingsConfigDict(env_file=".env")
-
-
-settings = Settings()
-
-
-url: str = settings.supabase_url
-key: str = settings.supabase_key
-supabase: Client = create_client(url, key)
+from app.config import logger
+from app.database import get_db
+from app.models import Planets
 
 
 app = FastAPI()
@@ -36,10 +15,10 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.get("/supabase")
-async def get_supabase():
-    response = supabase.table("planets").select("*").execute()
-    return response
+@app.get("/planets")
+async def get_planets(db: Session = Depends(get_db)):
+    planets = db.query(Planets).all()
+    return planets
 
 
 @app.post("/parse")
