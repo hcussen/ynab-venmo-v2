@@ -1,31 +1,6 @@
 from typing import Optional
 from fastapi import FastAPI, Form, Request
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from supabase import create_client, Client
-import logging
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-
-# Create logger
-logger = logging.getLogger(__name__)
-
-
-class Settings(BaseSettings):
-    supabase_url: str
-    supabase_key: str
-    model_config = SettingsConfigDict(env_file=".env")
-
-
-settings = Settings()
-
-
-url: str = settings.supabase_url
-key: str = settings.supabase_key
-supabase: Client = create_client(url, key)
+from app.config import settings, supabase, logger
 
 
 app = FastAPI()
