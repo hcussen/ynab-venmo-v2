@@ -19,6 +19,10 @@ export default async function Page() {
 
   return (
     <div className="container mx-auto p-4">
+      <h1>
+        Fetch data directly from supabase client, then from the api, which
+        fetches it from supabase via an ORM. Verify that both are the same.
+      </h1>
       <h1 className="text-2xl font-bold mb-4">Data from Supabase:</h1>
       <pre className="bg-gray-100 p-4 rounded mb-8 overflow-auto">
         {JSON.stringify(notes, null, 2)}
