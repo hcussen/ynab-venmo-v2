@@ -145,15 +145,11 @@ class Users(Base):
         )
 
 
-class Notes(Base):
-    __tablename__ = "notes"
-    __table_args__ = (PrimaryKeyConstraint("id", name="notes_pkey"),)
-
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    title: Mapped[Optional[str]] = mapped_column(Text)
-
-
 class Planets(Base):
+    """
+    test table to ensure supabase-orm-fastAPI integration is working properly
+    """
+
     __tablename__ = "planets"
     __table_args__ = (PrimaryKeyConstraint("id", name="planets_pkey"),)
 
