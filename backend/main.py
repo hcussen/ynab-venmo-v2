@@ -1,6 +1,10 @@
 from typing import Optional
-from fastapi import FastAPI, Form, Request
-from app.config import settings, supabase, logger
+from fastapi import FastAPI, Form, Depends, Request, HTTPException
+from sqlalchemy.orm import Session
+
+from app.config import logger
+from app.database import get_db
+from app.models import Planets
 
 
 app = FastAPI()
@@ -11,10 +15,10 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.get("/supabase")
-async def get_supabase():
-    response = supabase.table("planets").select("*").execute()
-    return response
+@app.get("/planets")
+async def get_planets(db: Session = Depends(get_db)):
+    planets = db.query(Planets).all()
+    return planets
 
 
 @app.post("/parse")
