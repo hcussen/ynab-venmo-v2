@@ -161,7 +161,7 @@ class Planets(Base):
     name: Mapped[Optional[str]] = mapped_column(Text)
 
 
-class Profiles(Users):
+class Profiles(Base):
     __tablename__ = "profiles"
     __table_args__ = (
         ForeignKeyConstraint(
@@ -175,6 +175,14 @@ class Profiles(Users):
     ynab_access_token: Mapped[Optional[str]] = mapped_column(String)
     ynab_budget_id: Mapped[Optional[str]] = mapped_column(String)
     ynab_account_id: Mapped[Optional[str]] = mapped_column(String)
+
+    # unidirectional, read-only relationshup to Users
+    user: Mapped["Users"] = relationship(
+        "Users",
+        primaryjoin="Profiles.id == Users.id",
+        foreign_keys=[id],
+        viewonly=True,  # This makes it read-only
+    )
 
     transactions: Mapped[List["Transactions"]] = relationship(
         "Transactions", back_populates="profile"
