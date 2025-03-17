@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     supabase_url: str
     supabase_key: str
     supabase_pwd: str
+    supabase_jwt_key: str
 
     # Add database URL for SQLAlchemy
     # This URL will point to your Supabase PostgreSQL database
