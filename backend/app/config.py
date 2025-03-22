@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     supabase_pwd: str
     supabase_jwt_key: str
 
+    ynab_client_id: str
+    ynab_client_secret: str
+    ynab_redirect_uri: str
+
     # Add database URL for SQLAlchemy
     # This URL will point to your Supabase PostgreSQL database
     database_url: str
