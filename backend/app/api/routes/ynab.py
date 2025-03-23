@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request, Depends, Body
 from fastapi.responses import RedirectResponse
 import httpx
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from app.database import get_db
 from app.core.auth import get_current_user
 from pydantic import BaseModel
@@ -72,7 +72,9 @@ async def oauth_callback(
             print(token_data)
 
             # Calculate expiry time
-            expires_at = datetime.now() + timedelta(seconds=token_data["expires_in"])
+            now_utc = datetime.now(timezone.utc)
+
+            expires_at = now_utc + timedelta(seconds=token_data["expires_in"])
 
             # Store tokens in Supabase
             values = {
@@ -80,10 +82,11 @@ async def oauth_callback(
                 "ynab_access_token": token_data["access_token"],
                 "ynab_refresh_token": token_data["refresh_token"],
                 "ynab_token_expires_at": expires_at.isoformat(),
-                "ynab_token_created_at": datetime.now().isoformat(),
-                "ynab_token_created_at": datetime.now().isoformat(),
+                "ynab_token_created_at": now_utc.isoformat(),
+                "ynab_token_updated_at": now_utc.isoformat(),
             }
             update_values = {k: v for k, v in values.items() if k != "id"}
+            print(values)
             statement = (
                 insert(Profiles)
                 .values(values)
@@ -91,6 +94,7 @@ async def oauth_callback(
             )
             print(statement)
             db.execute(statement)
+            db.commit()
 
             # Redirect back to frontend with success message
             return RedirectResponse(url=f"http://localhost:3000/onboarding/3")
