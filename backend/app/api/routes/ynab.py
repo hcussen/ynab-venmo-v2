@@ -97,7 +97,7 @@ async def oauth_callback(
             db.commit()
 
             # Redirect back to frontend with success message
-            return RedirectResponse(url=f"http://localhost:3000/onboarding/3")
+            return {"success": True, "state": "Successfully exhanged token"}
 
     except httpx.HTTPStatusError as e:
         print(f"YNAB API error: {str(e)}")

@@ -69,13 +69,17 @@ export default function OAuthCallback() {
 
           const data = await response.json()
 
-          // Handle success
-          setStatus("OAuth completed successfully!")
+          if (data.success) {
+            setStatus("OAuth completed successfully!")
+          }
 
-          // Optional: Redirect user to dashboard or success page
-          setTimeout(() => {
-            router.push("/dashboard")
-          }, 2000)
+          //   // Handle success
+          //   setStatus("OAuth completed successfully!")
+
+          //   // Optional: Redirect user to dashboard or success page
+          //   setTimeout(() => {
+          //     router.push("/dashboard")
+          //   }, 2000)
         } catch (error) {
           console.error("Error completing OAuth flow:", error)
           setStatus(`Error: ${error.message}`)
