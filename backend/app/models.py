@@ -1,5 +1,5 @@
 from typing import List, Optional
-
+from datetime import datetime
 from sqlalchemy import (
     BigInteger,
     Boolean,
@@ -167,10 +167,20 @@ class Profiles(Base):
     )
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
-    email_slug: Mapped[str] = mapped_column(String)
+    email_slug: Mapped[Optional[str]] = mapped_column(String)
     ynab_access_token: Mapped[Optional[str]] = mapped_column(String)
+    ynab_refresh_token: Mapped[Optional[str]] = mapped_column(String)
     ynab_budget_id: Mapped[Optional[str]] = mapped_column(String)
     ynab_account_id: Mapped[Optional[str]] = mapped_column(String)
+    ynab_token_expires_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True)
+    )
+    ynab_token_created_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True)
+    )
+    ynab_token_updated_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True)
+    )
 
     # unidirectional, read-only relationshup to Users
     user: Mapped["Users"] = relationship(
