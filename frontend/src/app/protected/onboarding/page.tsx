@@ -1,16 +1,38 @@
-// app/onboarding/page.jsx
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useState, Suspense } from "react"
 import ConnectYnabStep from "./ConnectYnabStep"
 import SetupCompleteStep from "./SetupCompleteStep"
 import OAuthCallback from "./OauthCallbackStep"
 
+// Create a separate component for handling search params
+function StepRenderer({ completedSteps, completeStep, goToStep }: any) {
+  const searchParams = useSearchParams()
+  const currentStep = searchParams.get("step") || "connect-ynab"
+
+  // Your switch case for rendering steps
+  switch (currentStep) {
+    case "connect-ynab":
+      return <ConnectYnabStep />
+    case "oauth-callback":
+      return (
+        <OAuthCallback
+          onComplete={() => {
+            completeStep("oauth-callback")
+            goToStep("setup-complete")
+          }}
+        />
+      )
+    case "setup-complete":
+      return <SetupCompleteStep />
+    default:
+      return <div>Unknown step</div>
+  }
+}
+
 export default function OnboardingPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const currentStep = searchParams.get("step") || "connect-ynab" // Default step
 
   // Track completed steps
   const [completedSteps, setCompletedSteps] = useState({
@@ -19,62 +41,23 @@ export default function OnboardingPage() {
     "setup-complete": false,
   })
 
-  useEffect(() => {
-    console.log(completedSteps)
-  }, [completedSteps])
-
   // Navigation functions
-  const goToStep = (step) => {
-    // Create new URL with updated query params
-    const params = new URLSearchParams(searchParams)
-    params.set("step", step)
-    router.push(`/protected/onboarding?${params.toString()}`)
+  const goToStep = (step: any) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set("step", step)
+    router.push(`/protected/onboarding?${url.searchParams.toString()}`)
   }
 
-  const completeStep = (step) => {
+  const completeStep = (step: any) => {
     setCompletedSteps({
       ...completedSteps,
       [step]: true,
     })
   }
 
-  // Render the current step
-  const renderStep = () => {
-    switch (currentStep) {
-      case "connect-ynab":
-        // Guard against direct URL access
-        return (
-          <ConnectYnabStep
-            onComplete={() => {
-              completeStep("connect-ynab")
-              goToStep("oauth-callback")
-            }}
-          />
-        )
-      case "oauth-callback":
-        return (
-          <OAuthCallback
-            onComplete={() => {
-              completeStep("oauth-callback")
-              goToStep("setup-complete")
-            }}
-          />
-        )
-      case "setup-complete":
-        // Guard against direct URL access
-        // if (!completedSteps["connect-ynab"]) {
-        //   goToStep("connect-ynab")
-        //   return <div>Redirecting...</div>
-        // }
-        return <SetupCompleteStep />
-      default:
-        return <div>Unknown step</div>
-    }
-  }
-
-  // Display progress indicator
+  // Calculate progress
   const totalSteps = Object.keys(completedSteps).length
-  const currentStepIndex = Object.keys(completedSteps).indexOf(currentStep) + 1
+  const currentStepIndex = 1 // Default, will be updated by StepRenderer
 
   return (
     <div className="onboarding-container">
@@ -82,19 +65,15 @@ export default function OnboardingPage() {
         <div>
           Step {currentStepIndex} of {totalSteps}
         </div>
-        <div className="step-indicators">
-          {Object.keys(completedSteps).map((step, index) => (
-            <div
-              key={step}
-              className={`step-indicator ${
-                currentStep === step ? "active" : ""
-              } ${completedSteps[step] ? "completed" : ""}`}
-            />
-          ))}
-        </div>
       </div>
 
-      {renderStep()}
+      <Suspense fallback={<div>Loading...</div>}>
+        <StepRenderer
+          completedSteps={completedSteps}
+          completeStep={completeStep}
+          goToStep={goToStep}
+        />
+      </Suspense>
     </div>
   )
 }

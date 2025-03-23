@@ -8,14 +8,3 @@ export function getApiUrl(): string {
     ? "http://localhost:8000"
     : (process.env.NEXT_PUBLIC_API_URL ?? "")
 }
-
-export async function makeAuthorizedRequest(endpoint, method, headers, body) {
-  fetch(`${getApiUrl()}${endpoint}`, {
-    method: method,
-    headers: {
-      ...headers,
-      Authorization: "",
-    },
-    body: JSON.stringify(body),
-  })
-}

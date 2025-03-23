@@ -2,16 +2,16 @@
 
 "use client" // Important! Mark as a Client Component
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { getApiUrl } from "@/lib/api"
 
-export default function OAuthCallback({ onComplete }) {
+export default function OAuthCallback({ onComplete }: any) {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const [user, setUser] = useState()
-  const [token, setToken] = useState()
+  const [user, setUser] = useState<any>()
+  const [token, setToken] = useState<string>()
 
   const [status, setStatus] = useState("Processing...")
 
@@ -31,8 +31,8 @@ export default function OAuthCallback({ onComplete }) {
 
     const loadUser = async () => {
       const result = await fetchUser()
-      setUser(result.user)
-      setToken(result.token)
+      setUser(result.user ?? "")
+      setToken(result.token ?? "")
     }
 
     loadUser()
@@ -75,7 +75,7 @@ export default function OAuthCallback({ onComplete }) {
           if (data.error) {
             setStatus(`Error: ${data.message}`)
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error("Error completing OAuth flow:", error)
           setStatus(`Error: ${error.message}`)
         }
@@ -96,10 +96,12 @@ export default function OAuthCallback({ onComplete }) {
 
   // Show loading state until we're done
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <h1 className="text-2xl font-bold mb-4">Completing Authorization</h1>
-      <p className="text-lg">{status}</p>
-      {/* You could add a spinner here */}
-    </div>
+    <Suspense>
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <h1 className="text-2xl font-bold mb-4">Completing Authorization</h1>
+        <p className="text-lg">{status}</p>
+        {/* You could add a spinner here */}
+      </div>
+    </Suspense>
   )
 }
