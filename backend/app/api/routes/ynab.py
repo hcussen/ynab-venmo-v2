@@ -6,8 +6,9 @@ from datetime import datetime, timedelta
 from app.database import get_db
 from app.core.auth import get_current_user
 from pydantic import BaseModel
-from app.models import Users
+from app.models import Users, Profiles
 from app.config import settings
+from sqlalchemy.dialects.postgresql import insert
 
 router = APIRouter(
     prefix="",
@@ -24,7 +25,7 @@ async def oauth_callback(
     request: Request,
     data: OAuthCallback,
     error: str = None,
-    supabase=Depends(get_db),
+    db=Depends(get_db),
     user: Users = Depends(get_current_user),
 ):
     print("code: ", data.code)
@@ -74,21 +75,25 @@ async def oauth_callback(
             expires_at = datetime.now() + timedelta(seconds=token_data["expires_in"])
 
             # Store tokens in Supabase
-            supabase.table("ynab_tokens").upsert(
-                {
-                    "user_id": user.id,
-                    "access_token": token_data["access_token"],
-                    "refresh_token": token_data["refresh_token"],
-                    "expires_at": expires_at.isoformat(),
-                    "created_at": datetime.now().isoformat(),
-                    "updated_at": datetime.now().isoformat(),
-                }
-            ).execute()
+            values = {
+                "id": user.id,
+                "ynab_access_token": token_data["access_token"],
+                "ynab_refresh_token": token_data["refresh_token"],
+                "ynab_token_expires_at": expires_at.isoformat(),
+                "ynab_token_created_at": datetime.now().isoformat(),
+                "ynab_token_created_at": datetime.now().isoformat(),
+            }
+            update_values = {k: v for k, v in values.items() if k != "id"}
+            statement = (
+                insert(Profiles)
+                .values(values)
+                .on_conflict_do_update(index_elements=["id"], set_=update_values)
+            )
+            print(statement)
+            db.execute(statement)
 
             # Redirect back to frontend with success message
-            return RedirectResponse(
-                url=f"{os.environ.get('FRONTEND_URL')}/settings?ynab_status=connected"
-            )
+            return RedirectResponse(url=f"http://localhost:3000/onboarding/3")
 
     except httpx.HTTPStatusError as e:
         print(f"YNAB API error: {str(e)}")
