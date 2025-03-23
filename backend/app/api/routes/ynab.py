@@ -101,11 +101,7 @@ async def oauth_callback(
 
     except httpx.HTTPStatusError as e:
         print(f"YNAB API error: {str(e)}")
-        return RedirectResponse(
-            url=f"{os.environ.get('FRONTEND_URL')}/settings?error=token_exchange_failed"
-        )
+        return {"success": False, "error": "YNAB API error", "message": e}
     except Exception as e:
         print(f"Unexpected error: {str(e)}")
-        return RedirectResponse(
-            url=f"{os.environ.get('FRONTEND_URL')}/settings?error=server_error"
-        )
+        return {"success": False, "error": "Server error", "message": e}

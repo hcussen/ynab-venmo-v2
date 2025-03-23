@@ -7,7 +7,7 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { getApiUrl } from "@/lib/api"
 
-export default function OAuthCallback() {
+export default function OAuthCallback({ onComplete }) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [user, setUser] = useState()
@@ -58,8 +58,6 @@ export default function OAuthCallback() {
             },
             body: JSON.stringify({
               code: code,
-              user_id: user.id,
-              // Any other data you need to send
             }),
           })
 
@@ -71,15 +69,12 @@ export default function OAuthCallback() {
 
           if (data.success) {
             setStatus("OAuth completed successfully!")
+            onComplete()
           }
 
-          //   // Handle success
-          //   setStatus("OAuth completed successfully!")
-
-          //   // Optional: Redirect user to dashboard or success page
-          //   setTimeout(() => {
-          //     router.push("/dashboard")
-          //   }, 2000)
+          if (data.error) {
+            setStatus(`Error: ${data.message}`)
+          }
         } catch (error) {
           console.error("Error completing OAuth flow:", error)
           setStatus(`Error: ${error.message}`)
