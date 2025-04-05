@@ -5,7 +5,7 @@
 import { useEffect, useState, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { getApiUrl } from "@/lib/api"
+import { getApiUrl } from "@/lib/urls"
 
 export default function OAuthCallback({ onComplete }: any) {
   const searchParams = useSearchParams()

@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useState, Suspense } from "react"
+import { useState, Suspense, useEffect } from "react"
 import ConnectYnabStep from "./ConnectYnabStep"
 import SetupCompleteStep from "./SetupCompleteStep"
 import OAuthCallback from "./OauthCallbackStep"
@@ -34,12 +34,25 @@ function StepRenderer({ completedSteps, completeStep, goToStep }: any) {
 export default function OnboardingPage() {
   const router = useRouter()
 
+  const searchParams = useSearchParams()
+  const currentStep = searchParams.get("step") || "connect-ynab"
+
   // Track completed steps
   const [completedSteps, setCompletedSteps] = useState({
-    "connect-ynab": false,
+    "connect-ynab": currentStep != "connect-ynab" ? true : false,
     "oauth-callback": false,
     "setup-complete": false,
   })
+
+  const [stepNum, setStepNum] = useState<number>(1)
+
+  useEffect(() => {
+    const numCompleted = Object.values(completedSteps).filter((value) => {
+      console.log(value)
+      return value
+    }).length
+    setStepNum(Math.min(numCompleted + 1, 3))
+  }, [completedSteps])
 
   // Navigation functions
   const goToStep = (step: any) => {
@@ -57,13 +70,12 @@ export default function OnboardingPage() {
 
   // Calculate progress
   const totalSteps = Object.keys(completedSteps).length
-  const currentStepIndex = 1 // Default, will be updated by StepRenderer
 
   return (
     <div className="onboarding-container">
       <div className="progress-bar">
         <div>
-          Step {currentStepIndex} of {totalSteps}
+          Step {stepNum} of {totalSteps}
         </div>
       </div>
 
