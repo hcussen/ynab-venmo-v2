@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Request, Depends, Body
+from fastapi import APIRouter, Request, Depends, Body, HTTPException
 from fastapi.responses import RedirectResponse
 import httpx
 import os
 from datetime import datetime, timedelta, timezone
 from app.database import get_db
 from app.core.auth import get_current_user
+from app.core.ynab import get_valid_ynab_token
 from pydantic import BaseModel
 from app.models import Users, Profiles
 from app.config import settings
@@ -105,3 +106,29 @@ async def oauth_callback(
     except Exception as e:
         print(f"Unexpected error: {str(e)}")
         return {"success": False, "error": "Server error", "message": e}
+
+
+@router.get("/budgets")
+async def get_budgets(
+    token: str = Depends(get_valid_ynab_token) #this depends on get_urrent_user, so it's handling auth
+):
+    """Get all budgets for the authenticated user"""
+    print("recived request to budgets")
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://api.ynab.com/v1/budgets",
+                headers={"Authorization": f"Bearer {token}"}
+            )
+            response.raise_for_status()
+            return response.json()
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail=f"YNAB API error: {e.response.text}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {str(e)}"
+        )

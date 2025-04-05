@@ -32,7 +32,7 @@ async def protected_route(current_user: Users = Depends(get_current_user)):
     }
 
 
-@router.get("/{item_id}", summary="Get an item by ID")
+@router.get("/items/{item_id}", summary="Get an item by ID")
 def read_item(item_id: int, q: Optional[str] = None):
     """
     Get details of a specific item
