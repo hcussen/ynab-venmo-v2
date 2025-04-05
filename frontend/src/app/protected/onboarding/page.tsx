@@ -39,20 +39,15 @@ export default function OnboardingPage() {
 
   // Track completed steps
   const [completedSteps, setCompletedSteps] = useState({
-    "connect-ynab": currentStep != "connect-ynab" ? true : false,
+    "connect-ynab": false,
     "oauth-callback": false,
     "setup-complete": false,
   })
-
-  const [stepNum, setStepNum] = useState<number>(1)
-
-  useEffect(() => {
-    const numCompleted = Object.values(completedSteps).filter((value) => {
-      console.log(value)
-      return value
-    }).length
-    setStepNum(Math.min(numCompleted + 1, 3))
-  }, [completedSteps])
+  const stepNums = {
+    "connect-ynab": 1,
+    "oauth-callback": 2,
+    "setup-complete": 3,
+  }
 
   // Navigation functions
   const goToStep = (step: any) => {
@@ -75,7 +70,7 @@ export default function OnboardingPage() {
     <div className="onboarding-container">
       <div className="progress-bar">
         <div>
-          Step {stepNum} of {totalSteps}
+          Step {stepNums[currentStep]} of {totalSteps}
         </div>
       </div>
 

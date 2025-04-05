@@ -1,6 +1,6 @@
 // app/onboarding/steps/ConnectYNABStep.jsx
 import { Button } from "@/components/ui/button"
-import { getApiUrl, getFrontendUrl } from "@/lib/urls"
+import { getFrontendUrl } from "@/lib/urls"
 import Link from "next/link"
 
 export default function ConnectYNABStep() {
