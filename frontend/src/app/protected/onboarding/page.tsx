@@ -10,32 +10,48 @@ import SetupCompleteStep from "./SetupCompleteStep"
 function StepRenderer({ completedSteps, completeStep, goToStep }: any) {
   const searchParams = useSearchParams()
   const currentStep = searchParams.get("step") || "connect-ynab"
+  const stepNums = {
+    "connect-ynab": 1,
+    "oauth-callback": 2,
+    "setup-complete": 3,
+  }
+
+  function render() {
+    switch (currentStep) {
+      case "connect-ynab":
+        return <ConnectYnabStep />
+      case "oauth-callback":
+        return (
+          <OAuthCallback
+            onComplete={() => {
+              completeStep("oauth-callback")
+              goToStep("setup-complete")
+            }}
+          />
+        )
+      case "setup-complete":
+        return <SetupCompleteStep />
+      default:
+        return <div>Unknown step</div>
+    }
+  }
 
   // Your switch case for rendering steps
-  switch (currentStep) {
-    case "connect-ynab":
-      return <ConnectYnabStep />
-    case "oauth-callback":
-      return (
-        <OAuthCallback
-          onComplete={() => {
-            completeStep("oauth-callback")
-            goToStep("setup-complete")
-          }}
-        />
-      )
-    case "setup-complete":
-      return <SetupCompleteStep />
-    default:
-      return <div>Unknown step</div>
-  }
+  return (
+    <>
+      <div className="progress-bar">
+        <div>
+          {/* @ts-ignore */}
+          Step {stepNums[currentStep]} of {totalSteps}
+        </div>
+      </div>
+      {render()}
+    </>
+  )
 }
 
 export default function OnboardingPage() {
   const router = useRouter()
-
-  const searchParams = useSearchParams()
-  const currentStep = searchParams.get("step") || "connect-ynab"
 
   // Track completed steps
   const [completedSteps, setCompletedSteps] = useState({
@@ -43,11 +59,6 @@ export default function OnboardingPage() {
     "oauth-callback": false,
     "setup-complete": false,
   })
-  const stepNums = {
-    "connect-ynab": 1,
-    "oauth-callback": 2,
-    "setup-complete": 3,
-  }
 
   // Navigation functions
   const goToStep = (step: any) => {
@@ -68,13 +79,6 @@ export default function OnboardingPage() {
 
   return (
     <div className="onboarding-container">
-      <div className="progress-bar">
-        <div>
-          {/* @ts-ignore */}
-          Step {stepNums[currentStep]} of {totalSteps}
-        </div>
-      </div>
-
       <Suspense fallback={<div>Loading...</div>}>
         <StepRenderer
           completedSteps={completedSteps}
