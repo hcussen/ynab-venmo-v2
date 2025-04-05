@@ -1,10 +1,10 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useState, Suspense, useEffect } from "react"
+import { Suspense, useState } from "react"
 import ConnectYnabStep from "./ConnectYnabStep"
-import SetupCompleteStep from "./SetupCompleteStep"
 import OAuthCallback from "./OauthCallbackStep"
+import SetupCompleteStep from "./SetupCompleteStep"
 
 // Create a separate component for handling search params
 function StepRenderer({ completedSteps, completeStep, goToStep }: any) {
