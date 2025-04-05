@@ -1,34 +1,53 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useState, Suspense } from "react"
+import { Suspense, useState } from "react"
 import ConnectYnabStep from "./ConnectYnabStep"
-import SetupCompleteStep from "./SetupCompleteStep"
 import OAuthCallback from "./OauthCallbackStep"
+import SetupCompleteStep from "./SetupCompleteStep"
 
 // Create a separate component for handling search params
 function StepRenderer({ completedSteps, completeStep, goToStep }: any) {
   const searchParams = useSearchParams()
   const currentStep = searchParams.get("step") || "connect-ynab"
+  const stepNums = {
+    "connect-ynab": 1,
+    "oauth-callback": 2,
+    "setup-complete": 3,
+  }
+
+  function render() {
+    switch (currentStep) {
+      case "connect-ynab":
+        return <ConnectYnabStep />
+      case "oauth-callback":
+        return (
+          <OAuthCallback
+            onComplete={() => {
+              completeStep("oauth-callback")
+              goToStep("setup-complete")
+            }}
+          />
+        )
+      case "setup-complete":
+        return <SetupCompleteStep />
+      default:
+        return <div>Unknown step</div>
+    }
+  }
 
   // Your switch case for rendering steps
-  switch (currentStep) {
-    case "connect-ynab":
-      return <ConnectYnabStep />
-    case "oauth-callback":
-      return (
-        <OAuthCallback
-          onComplete={() => {
-            completeStep("oauth-callback")
-            goToStep("setup-complete")
-          }}
-        />
-      )
-    case "setup-complete":
-      return <SetupCompleteStep />
-    default:
-      return <div>Unknown step</div>
-  }
+  return (
+    <>
+      <div className="progress-bar">
+        <div>
+          {/* @ts-ignore */}
+          Step {stepNums[currentStep]} of {totalSteps}
+        </div>
+      </div>
+      {render()}
+    </>
+  )
 }
 
 export default function OnboardingPage() {
@@ -57,16 +76,9 @@ export default function OnboardingPage() {
 
   // Calculate progress
   const totalSteps = Object.keys(completedSteps).length
-  const currentStepIndex = 1 // Default, will be updated by StepRenderer
 
   return (
     <div className="onboarding-container">
-      <div className="progress-bar">
-        <div>
-          Step {currentStepIndex} of {totalSteps}
-        </div>
-      </div>
-
       <Suspense fallback={<div>Loading...</div>}>
         <StepRenderer
           completedSteps={completedSteps}

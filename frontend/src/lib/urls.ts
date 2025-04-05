@@ -8,3 +8,10 @@ export function getApiUrl(): string {
     ? "http://localhost:8000"
     : (process.env.NEXT_PUBLIC_API_URL ?? "")
 }
+
+export function getFrontendUrl(): string {
+  const isDevelopment = process.env.NODE_ENV !== "production"
+  return isDevelopment
+    ? "http://localhost:3000"
+    : (process.env.VERCEL_PROJECT_PRODUCTION_URL ?? "")
+}

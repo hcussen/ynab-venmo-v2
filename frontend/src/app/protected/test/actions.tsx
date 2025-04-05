@@ -1,7 +1,7 @@
 // src/app/actions.ts
 "use server"
 
-import { getApiUrl } from "@/lib/api"
+import { getApiUrl } from "@/lib/urls"
 
 /**
  * Fetches planets data from the API
