@@ -70,6 +70,7 @@ export default function OnboardingPage() {
     <div className="onboarding-container">
       <div className="progress-bar">
         <div>
+          {/* @ts-ignore */}
           Step {stepNums[currentStep]} of {totalSteps}
         </div>
       </div>
