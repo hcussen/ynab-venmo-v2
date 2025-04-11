@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/client"
+import { createClient } from "@/lib/supabase/server"
 import { getApiUrl } from "./urls"
 
 type RequestMethod = "GET" | "POST" | "PUT" | "DELETE"
@@ -25,7 +25,7 @@ class ApiClient {
   }
 
   private async getAuthToken(): Promise<string | null> {
-    const supabase = createClient()
+    const supabase = await createClient()
     const session = await supabase.auth.getSession()
     return session.data.session?.access_token || null
   }
@@ -35,6 +35,8 @@ class ApiClient {
     options: RequestOptions = {}
   ): Promise<T> {
     const token = await this.getAuthToken()
+    console.log("API Request Token:", token ? "Present" : "Missing")
+
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       ...options.headers,
@@ -42,6 +44,9 @@ class ApiClient {
 
     if (token) {
       headers["Authorization"] = `Bearer ${token}`
+      console.log("Added Authorization header")
+    } else {
+      console.log("No token available for request")
     }
 
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
