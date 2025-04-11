@@ -35,7 +35,6 @@ class ApiClient {
     options: RequestOptions = {}
   ): Promise<T> {
     const token = await this.getAuthToken()
-    console.log("API Request Token:", token ? "Present" : "Missing")
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -44,9 +43,6 @@ class ApiClient {
 
     if (token) {
       headers["Authorization"] = `Bearer ${token}`
-      console.log("Added Authorization header")
-    } else {
-      console.log("No token available for request")
     }
 
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
