@@ -7,7 +7,17 @@ import OAuthCallback from "./OauthCallbackStep"
 import SetupCompleteStep from "./SetupCompleteStep"
 
 // Create a separate component for handling search params
-function StepRenderer({ completedSteps, completeStep, goToStep }: any) {
+function StepRenderer({
+  completedSteps,
+  completeStep,
+  goToStep,
+  totalSteps,
+}: {
+  completedSteps: Record<string, boolean>
+  completeStep: (step: string) => void
+  goToStep: (step: string) => void
+  totalSteps: number
+}) {
   const searchParams = useSearchParams()
   const currentStep = searchParams.get("step") || "connect-ynab"
   const stepNums = {
@@ -84,6 +94,7 @@ export default function OnboardingPage() {
           completedSteps={completedSteps}
           completeStep={completeStep}
           goToStep={goToStep}
+          totalSteps={totalSteps}
         />
       </Suspense>
     </div>
