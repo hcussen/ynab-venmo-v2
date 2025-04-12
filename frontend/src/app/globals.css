@@ -66,4 +66,8 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  code {
+    @apply bg-muted px-1 rounded;
+  }
 }
