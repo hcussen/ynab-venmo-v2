@@ -1,4 +1,3 @@
-"use client"
 import {
   Card,
   CardContent,
@@ -7,20 +6,29 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { CheckCircle2, Copy, Check } from "lucide-react"
-import { useState } from "react"
+import { CheckCircle2 } from "lucide-react"
+import { createClient } from "@/lib/supabase/server"
+import { EmailCopyButton } from "./EmailCopyButton"
 
-export default function SetupEmailPage() {
-  const emailSlug = "123xyz"
-  const [copied, setCopied] = useState(false)
-
-  const copyEmail = async () => {
-    const email = `${emailSlug}@parse.venmoforynab.com`
-    await navigator.clipboard.writeText(email)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+export default async function SetupEmailPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) {
+    throw new Error('User not authenticated')
   }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('email_slug')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile?.email_slug) {
+    throw new Error('Email slug not found')
+  }
+
+  const emailSlug = profile.email_slug
   return (
     <div className="container mx-auto py-8 max-w-2xl">
       <Card>
@@ -49,19 +57,7 @@ export default function SetupEmailPage() {
                     Forward to:{" "}
                     <code className="ml-1">
                       {`${emailSlug}@parse.venmoforynab.com`}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={copyEmail}
-                        className="h-8 px-2 ml-2"
-                      >
-                        {copied ? (
-                          <Check className="h-4 w-4" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                        <span className="sr-only">Copy email address</span>
-                      </Button>
+                      <EmailCopyButton emailSlug={emailSlug} />
                     </code>
                   </li>
                 </ul>
