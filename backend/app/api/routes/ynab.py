@@ -2,14 +2,24 @@ from fastapi import APIRouter, Request, Depends, Body, HTTPException
 from fastapi.responses import RedirectResponse
 import httpx
 import os
-from datetime import datetime, timedelta, timezone
-from app.database import get_db
-from app.core.auth import get_current_user
-from app.core.ynab import get_valid_ynab_token, YNABClient
-from pydantic import BaseModel
-from app.models import Users, Profiles
-from app.config import settings
+from datetime import datetime, timezone, timedelta
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.dialects.postgresql import insert
+from pydantic import BaseModel
+
+from app.core.auth import get_current_user
+from app.core.ynab import get_valid_ynab_token
+from app.database import get_db
+from app.config import settings
+from app.models import Users, Profiles
+
+import random
+import string
+
+def generate_email_slug(email: str) -> str:
+    email_prefix = email.split('@')[0][:5]  # Take up to first 5 chars of email
+    random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=5))  # 5 random chars
+    return f"{email_prefix}.{random_suffix}"
 
 router = APIRouter(
     prefix="",
@@ -76,10 +86,12 @@ async def oauth_callback(
             now_utc = datetime.now(timezone.utc)
 
             expires_at = now_utc + timedelta(seconds=token_data["expires_in"])
+            
 
             # Store tokens in Supabase
             values = {
                 "id": user.id,
+                "email_slug": generate_email_slug(user.email),
                 "ynab_access_token": token_data["access_token"],
                 "ynab_refresh_token": token_data["refresh_token"],
                 "ynab_token_expires_at": expires_at.isoformat(),
@@ -123,21 +135,3 @@ async def get_budgets(
             status_code=500,
             detail=f"Unexpected error: {str(e)}"
         )
-    # try:
-    #     async with httpx.AsyncClient() as client:
-    #         response = await client.get(
-    #             "https://api.ynab.com/v1/budgets",
-    #             headers={"Authorization": f"Bearer {token}"}
-    #         )
-    #         response.raise_for_status()
-    #         return response.json()
-    # except httpx.HTTPStatusError as e:
-    #     raise HTTPException(
-    #         status_code=e.response.status_code,
-    #         detail=f"YNAB API error: {e.response.text}"
-    #     )
-    # except Exception as e:
-    #     raise HTTPException(
-    #         status_code=500,
-    #         detail=f"Unexpected error: {str(e)}"
-    #     )

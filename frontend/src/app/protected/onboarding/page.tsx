@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Suspense, useState } from "react"
 import ConnectYnabStep from "./ConnectYnabStep"
 import OAuthCallback from "./OauthCallbackStep"
-import SetupCompleteStep from "./SetupCompleteStep"
+import YnabConnected from "./YnabConnected"
 
 // Create a separate component for handling search params
 function StepRenderer({
@@ -40,7 +40,7 @@ function StepRenderer({
           />
         )
       case "setup-complete":
-        return <SetupCompleteStep />
+        return <YnabConnected />
       default:
         return <div>Unknown step</div>
     }
