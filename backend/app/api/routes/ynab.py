@@ -4,11 +4,12 @@ import httpx
 import os
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Request
-from sqlalchemy import insert
-from sqlalchemy.orm import Session
+from sqlalchemy.dialects.postgresql import insert
+from pydantic import BaseModel
 
 from app.core.auth import get_current_user
-from app.core.db import get_db
+from app.core.ynab import get_valid_ynab_token
+from app.database import get_db
 from app.config import settings
 from app.models import Users, Profiles
 
