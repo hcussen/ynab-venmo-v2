@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { AccessTokenDisplay } from "./AccessTokenDisplay"
 import { api } from "@/lib/api"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Info } from "lucide-react"
 
 interface ProtectedResponse {
   message: string
@@ -28,6 +30,14 @@ export default async function TokenPage() {
 
   return (
     <div className="p-4">
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertTitle>Heads up!</AlertTitle>
+        <AlertDescription>
+          This is a protected page only logged-in users can see
+        </AlertDescription>
+      </Alert>
+
       <p>API Response: {protectedData.message}</p>
       <h2 className="text-xl font-bold mb-4">Your JWT is</h2>
       <AccessTokenDisplay token={accessToken} />
