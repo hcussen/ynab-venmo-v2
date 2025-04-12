@@ -9,23 +9,31 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { CheckCircle2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { EmailCopyButton } from "./EmailCopyButton"
+import Link from "next/link"
 
 export default async function SetupEmailPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
   if (!user) {
-    throw new Error('User not authenticated')
+    throw new Error("User not authenticated")
   }
 
   const { data: profile } = await supabase
-    .from('profiles')
-    .select('email_slug')
-    .eq('id', user.id)
+    .from("profiles")
+    .select("email_slug")
+    .eq("id", user.id)
     .single()
 
   if (!profile?.email_slug) {
-    throw new Error('Email slug not found')
+    return (
+      <>
+        You need to connect your YNAB account before doing these steps. Go to{" "}
+        <Link href="/protected/onboarding">onboarding</Link>.
+      </>
+    )
   }
 
   const emailSlug = profile.email_slug
