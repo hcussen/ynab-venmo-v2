@@ -1,10 +1,23 @@
 import { createClient } from "@/lib/supabase/server"
 import { InfoIcon } from "lucide-react"
-import { AccessTokenDisplay } from "./AccessTokenDisplay"
-import { api } from "@/lib/api"
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
-interface ProtectedResponse {
-  message: string
+type Transaction = {
+  id: string
+  transaction_date: string
+  amount: number
+  payee_name: string
+  memo: string
+  posted_to_ynab: "not_posted" | "posted_success" | "posted_error"
+  cleared: boolean
 }
 
 export default async function Home() {
@@ -14,44 +27,62 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const session = await supabase.auth.getSession()
-
-  // Make the protected API call
-  let protectedData: ProtectedResponse = {
-    message: "Failed to fetch protected data",
-  }
-  try {
-    protectedData = await api.get<ProtectedResponse>("/protected")
-  } catch (error) {
-    console.error("Error fetching protected data:", error)
-  }
-
   if (!user) {
-    return <>Not logged in!</>
+    return <div>Not logged in</div>
+  }
+
+  const { data: transactions, error } = await supabase
+    .from("transactions")
+    .select("*")
+    .eq("profile_id", user.id)
+    .order("transaction_date", { ascending: false })
+
+  if (error) {
+    console.error("Error fetching transactions:", error)
+    return <div>Error loading transactions</div>
   }
 
   return (
     <>
-      <h1>The dashboard will go here!</h1>
-      <p>API Response: {protectedData.message}</p>
-      <div className="flex-1 w-full flex flex-col gap-12">
-        <div className="w-full">
-          <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground flex gap-3 items-center">
-            <InfoIcon size="16" strokeWidth={2} />
-            This is a protected page that you can only see as an authenticated
-            user
-          </div>
-        </div>
-        <div className="flex flex-col gap-2 items-start">
-          <h2>Your JWT is</h2>
-          <AccessTokenDisplay token={session.data.session?.access_token} />
-
-          <h2 className="font-bold text-2xl mb-4">Your user details</h2>
-          <pre className="text-xs font-mono p-3 rounded border max-h-32 overflow-auto">
-            {JSON.stringify(user, null, 2)}
-          </pre>
-        </div>
-      </div>
+      <h1 className="text-2xl font-bold">Your Transactions</h1>
+      <Table>
+        <TableCaption>A list of your transactions.</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Date</TableHead>
+            <TableHead>Payee</TableHead>
+            <TableHead>Memo</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Amount</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {transactions.map((transaction: Transaction) => (
+            <TableRow key={transaction.id}>
+              <TableCell className="font-medium">
+                {new Date(transaction.transaction_date).toLocaleDateString(
+                  "en-US",
+                  { month: "short", day: "numeric", year: "numeric" }
+                )}
+              </TableCell>
+              <TableCell>{transaction.payee_name}</TableCell>
+              <TableCell>{transaction.memo}</TableCell>
+              <TableCell>
+                {transaction.posted_to_ynab === "posted_success" ? (
+                  <span className="text-green-600">Synced</span>
+                ) : transaction.posted_to_ynab === "posted_error" ? (
+                  <span className="text-red-600">Error syncing</span>
+                ) : (
+                  <span className="text-yellow-600">Not synced yet</span>
+                )}
+              </TableCell>
+              <TableCell className="text-right">
+                ${(Math.abs(transaction.amount) / 1000).toFixed(2)}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </>
   )
 }
